@@ -26,7 +26,11 @@
   <div class="control-group">
     <%= f.label :business_number, :class => 'control-label' %>
     <div class="controls">
-      <%= f.text_field :business_number, :class => 'form-control input-mask-phone' %>
+      <% if !@number.business_number.nil? %>
+        <%= f.text_field :business_number, :value => number_to_phone(@number.business_number, :area_code => true).gsub(/^\+\d/, ''), :class => 'form-control input-mask-phone' %>
+      <% else %>
+        <%= f.text_field :business_number, :class => 'form-control input-mask-phone' %>
+      <% end %>
     </div>
     <%= error_span(@number[:business_number]) %>
   </div>
