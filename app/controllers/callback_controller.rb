@@ -42,9 +42,11 @@ class CallbackController < ApplicationController
 
           @call = Call.where(:call_id => params[:tag]).first
           @call.end_time = params[:time]
-          @call.duration = (@call.start_time - @call.end_time).to_i
-          @call.state = "completed"
 
+          if !@call.start_time.nil?
+            @call.duration = (@call.start_time - @call.end_time).to_i
+            @call.state = "completed"
+          end
      else 
 
           render nothing: true
