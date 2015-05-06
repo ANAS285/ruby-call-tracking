@@ -33,12 +33,19 @@ class NumbersController < ApplicationController
     begin 
 
         numbers = Bandwidth::AvailableNumber.search_local({:area_code => @number.area_code[1..3]})
-        number = Bandwidth::PhoneNumber.create({:number => numbers[0][:number]})
-        @number.tracking_number = number.number
-        @number.bw_id = number.id
+        
+        if numbers.count > 0
+          number = Bandwidth::PhoneNumber.create({:number => numbers[0][:number]})
+          @number.tracking_number = number.number
+          @number.bw_id = number.id
+        else
+          raise "Area Code Not Available."    
+        
+        end
 
     rescue StandardError => e
-        puts "ERROR: "+e.message    
+        puts "ERROR: "+e.message
+        raise "There was a problem setting up your number. Try again."    
     end 
 
     respond_to do |format|
