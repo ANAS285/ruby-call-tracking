@@ -22,7 +22,7 @@
           <td><%= call.to %></td>
           <td><%= call.call_id %></td>
           <td><%= call.number_id %></td>
-          <td><%=l call.created_at %></td>
+          <td><%= call.created_at %></td>
           <td>
             <%= link_to t('.edit', :default => t("helpers.links.edit")),
                         edit_call_path(call), :class => 'btn btn-default btn-xs' %>
