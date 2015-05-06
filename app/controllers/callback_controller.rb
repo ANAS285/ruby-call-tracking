@@ -8,8 +8,7 @@ class CallbackController < ApplicationController
   def call_tracking
     
     puts "Inbound Number: "+params[:to]
-    puts "Inbound Tag: "+params[:tag]
-
+    #puts "Inbound Tag: "+params[:tag]
 
      if params[:eventType] == 'answer' and params[:tag] is nil
 
