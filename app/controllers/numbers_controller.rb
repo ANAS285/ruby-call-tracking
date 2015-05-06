@@ -45,7 +45,8 @@ class NumbersController < ApplicationController
 
     rescue StandardError => e
         puts "ERROR: "+e.message
-        raise "There was a problem setting up your number. Try again."    
+            flash[:notice] = "There was a problem setting up your number. Try again."
+            raise "There was a problem setting up your number. Try again."    
     end 
 
     respond_to do |format|
