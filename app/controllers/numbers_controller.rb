@@ -40,7 +40,7 @@ class NumbersController < ApplicationController
           @number.bw_id = number.id
         else
           flash[:notice] = "Area Code Not Available."
-          raise "Area Code Not Available."    
+
         end
 
     rescue StandardError => e
