@@ -7,7 +7,7 @@ class CallbackController < ApplicationController
     #puts "Inbound Number: "+params[:to]
     #puts "Inbound Tag: "+params[:tag]
 
-     if (params[:eventType] == 'answer') && (!defined? params[:tag])
+     if (params[:eventType] == 'answer')
 
       @number = Number.where(:tracking_number => params[:to]).first
 
@@ -26,11 +26,11 @@ class CallbackController < ApplicationController
 
       Bandwidth::Call.get(params[:callId]).update({:tag => params[:callId], :state=>'transferring', :transferTo=>@number.business_number, :callbackUrl=> ENV["BANDWIDTH_VOICE_URL"]})
 
-     elsif (params[:eventType] == 'answer') and (defined? params[:tag])
+     #elsif (params[:eventType] == 'answer') and (defined? params[:tag])
 
-          @call = Call.where(:call_id => params[:tag]).first
-          @call.start_time = params[:time]
-          @call.state = "answered"
+     #     @call = Call.where(:call_id => params[:tag]).first
+     #     @call.start_time = params[:time]
+     #     @call.state = "answered"
 
      elsif (params[:eventType] == 'hangup') and (defined? params[:tag])
 
