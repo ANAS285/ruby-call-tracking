@@ -7,37 +7,43 @@ class CallbackController < ApplicationController
  
   def call_tracking
     
-   if params[:eventType] == 'answer' and params[:tag] == ''
+     if params[:eventType] == 'answer' and params[:tag] == ''
 
-    @number = Number.where(:tracking_number => params[:to]).first
-    @call = Call.where(:call_id => params[:callId]).first_or_create
+      @number = Number.where(:tracking_number => params[:to]).first
 
-    @call.number_id = @number.id
-    @call.call_id = params[:callId]
-    @call.to = params[:to]
-    @call.from = params[:from]
-    @call.state = "ringing"
+      puts "LOG - Number - "+@number 
 
-    Bandwidth::Call.get(params[:callId]).update({:tag => params[:callId], :state=>'transferring', :transferTo=>@number.business_number, :callbackUrl=> ENV["BANDWIDTH_VOICE_URL"]})
+      puts "LOG - Call Id - "+params[:callId]
 
-   elsif params[:eventType] == 'answer' and params[:tag] != ''
+      @call = Call.where(:call_id => params[:callId]).first_or_create
 
-        @call = Call.where(:call_id => params[:tag]).first
-        @call.start_time = params[:time]
-        @call.state = "answered"
+      @call.number_id = @number.id
+      @call.call_id = params[:callId]
+      @call.to = params[:to]
+      @call.from = params[:from]
+      @call.state = "ringing"
 
-   elsif params[:eventType] == 'hangup' and params[:tag] != ''
+      Bandwidth::Call.get(params[:callId]).update({:tag => params[:callId], :state=>'transferring', :transferTo=>@number.business_number, :callbackUrl=> ENV["BANDWIDTH_VOICE_URL"]})
 
-        @call = Call.where(:call_id => params[:tag]).first
-        @call.end_time = params[:time]
-        @call.duration = (@call.start_time - @call.end_time).to_i
-        @call.state = "completed"
+     elsif params[:eventType] == 'answer' and params[:tag] != ''
 
-   else 
+          @call = Call.where(:call_id => params[:tag]).first
+          @call.start_time = params[:time]
+          @call.state = "answered"
 
-        return
+     elsif params[:eventType] == 'hangup' and params[:tag] != ''
 
-   end
+          @call = Call.where(:call_id => params[:tag]).first
+          @call.end_time = params[:time]
+          @call.duration = (@call.start_time - @call.end_time).to_i
+          @call.state = "completed"
+
+     else 
+
+          return
+          render nothing: true
+
+     end
 
     if @call.save    
 
@@ -48,7 +54,6 @@ class CallbackController < ApplicationController
       render status: 500
 
     end
-
 
   end
 end
