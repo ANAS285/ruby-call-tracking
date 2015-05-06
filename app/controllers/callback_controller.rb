@@ -45,7 +45,7 @@ class CallbackController < ApplicationController
           @call.end_time = params[:time]
 
           if !@call.start_time.nil?
-            @call.duration = (@call.start_time - @call.end_time).to_i
+            @call.call_duration = (@call.start_time - @call.end_time).to_i
             @call.state = "completed"
           end
 
