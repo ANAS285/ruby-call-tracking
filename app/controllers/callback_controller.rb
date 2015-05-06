@@ -7,7 +7,11 @@ class CallbackController < ApplicationController
  
   def call_tracking
     
-     if params[:eventType] == 'answer' and params[:tag] == ''
+    puts "Inbound Number: "+params[:to]
+    puts "Inbound Tag: "+params[:tag]
+
+
+     if params[:eventType] == 'answer' and params[:tag] is nil
 
       @number = Number.where(:tracking_number => params[:to]).first
 
@@ -47,7 +51,7 @@ class CallbackController < ApplicationController
 
     if @call.save    
 
-        render nothing: true
+        render status: 200
    
     else
 
