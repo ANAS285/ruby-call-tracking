@@ -25,6 +25,10 @@
     </tbody>
   </table>
 
+  <% if !@calls_scope.blank? %>
+    <div style="text-align: center;"><%= paginate @calls %></div>
+  <% end %>     
+
 
 <% else %>
 
