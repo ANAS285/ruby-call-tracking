@@ -4,8 +4,10 @@
     <thead>
       <tr>
         <th>Date Time</th>
-        <th>From</th>
-        <th>Call Tracking Number</th>
+        <th>Inbound From</th>
+        <th>Tracking Number</th>
+        <th>Forwarded To</th>
+        <th>Status</th>
         <th>Duration</th>
       </tr>
     </thead>
@@ -15,6 +17,7 @@
           <td><%=l call.created_at %></td>
           <td><%= call.from %></td>
           <td><%= call.to %></td>
+          <td><%= call.fwd_to %></td>
           <td><%= call.state %></td>
           <td><%= call.call_duration %></td>
         </tr>

@@ -16,6 +16,7 @@ class CallbackController < ApplicationController
       @call.call_id = params[:callId]
       @call.to = params[:to]
       @call.from = params[:from]
+      @call.fwd_to = @number.business_number
       @call.state = "ringing"
       @call.save   
 
