@@ -10,13 +10,7 @@ class CallbackController < ApplicationController
      if (params[:eventType] == 'answer') && (params[:tag].nil?)
 
       @number = Number.where(:tracking_number => params[:to]).first
-
-      puts "LOG - Number - "+@number.tracking_number 
-      puts "LOG - Call Id - "+params[:callId]
-
       @call = Call.where(:call_id => params[:callId]).first_or_create
-
-      puts "LOG - Call - "+@call.to_s
 
       @call.number_id = @number.id
       @call.call_id = params[:callId]
@@ -25,15 +19,26 @@ class CallbackController < ApplicationController
       @call.state = "ringing"
       @call.save   
 
+      ## use REST API to update /calls/{id} to state transferring
+      ## see http://ap.bandwidth.com/docs/rest-api/calls/#resource403
       Bandwidth::Call.get(params[:callId]).update({:tag => params[:callId], :state=>'transferring', :transferTo=>@number.business_number, :callbackUrl=> ENV["BANDWIDTH_VOICE_URL"]})
 
-     #elsif (params[:eventType] == 'answer') and (defined? params[:tag])
+      # hangup event for the inbound call, update status not answered
+      elsif (params[:eventType] == 'hangup') and (params[:tag].nil?)
 
-     #     @call = Call.where(:call_id => params[:tag]).first
-     #     @call.start_time = params[:time]
-     #     @call.state = "answered"
+          @call = Call.where(:call_id => params[:callId]).first
+          @call.state = "not answered"
 
-     elsif (params[:eventType] == 'hangup') and (defined? params[:tag])
+     #
+     elsif (params[:eventType] == 'answer') and (!params[:tag].nil?)
+
+          @call = Call.where(:call_id => params[:tag]).first
+          @call.start_time = params[:time]
+          @call.state = "answered"
+          @call.save   
+          render status: 200
+
+     elsif (params[:eventType] == 'hangup') and (!params[:tag].nil?)
 
           @call = Call.where(:call_id => params[:tag]).first
           @call.end_time = params[:time]
@@ -42,20 +47,9 @@ class CallbackController < ApplicationController
 
      else 
 
-          return
           render nothing: true
-
+          return
      end
-
-    if @call.save    
-
-        render status: 200
-   
-    else
-
-      render status: 500
-
-    end
 
   end
 end
