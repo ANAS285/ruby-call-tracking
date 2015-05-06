@@ -7,6 +7,7 @@ class CallbackController < ApplicationController
     #puts "Inbound Number: "+params[:to]
     #puts "Inbound Tag: "+params[:tag]
 
+     # Inbound call answered for tracking number, no "tag" property for inbound calls
      if (params[:eventType] == 'answer') && (params[:tag].nil?)
 
       @number = Number.where(:tracking_number => params[:to]).first
@@ -29,7 +30,10 @@ class CallbackController < ApplicationController
 
           @call = Call.where(:call_id => params[:callId]).first
           
-          @call.state = "not answered" unless @call.state == "completed" end
+          if @call.state == "ringing" 
+            @call.state = "not answered" 
+          end
+          
           @call.save   
 
      #
