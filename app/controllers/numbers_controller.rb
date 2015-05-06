@@ -40,12 +40,13 @@ class NumbersController < ApplicationController
           @number.bw_id = number.id
         else
           raise "Area Code Not Available."    
+          flash[:notice] = "Area Code Not Available."
+          redirect_to /
         
         end
 
     rescue StandardError => e
         puts "ERROR: "+e.message
-            flash[:notice] = "There was a problem setting up your number. Try again."
             raise "There was a problem setting up your number. Try again."    
     end 
 
