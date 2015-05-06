@@ -1,0 +1,44 @@
+<% if  @numbers.any? %>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Call Tracking Phone Number</th>
+        <th>Business Phone</th>
+        <th style='text-align: center;'>Phone Calls</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @numbers.each do |number| %>
+        <tr>
+          <td><%= number_to_phone(number.tracking_number, :area_code => true).gsub(/^\+\d/, '') if !number.tracking_number.blank? %></td>
+          <td><%= number_to_phone(number.business_number, :area_code => true).gsub(/^\+\d/, '') if !number.business_number.blank? %></td>
+          <td style='text-align: center;'>
+            <%= link_to t('.new', :default => Call.where(:number_id => number.id).count), number_calls_path(number) %>
+          </td>
+
+          <td>
+            <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                        edit_number_path(number), :class => 'btn btn-default btn-xs' %>
+            <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                        number_path(number),
+                        :method => :delete,
+                        :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
+                        :class => 'btn btn-xs btn-danger' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+<% else %>
+
+  <div class="well">No Call Tracking Numbers?  Set one up.</div>
+
+
+<% end %>
+
+<%= link_to 'Create Call Tracking Number',
+            new_number_path,
+            :class => 'btn btn-primary' %>

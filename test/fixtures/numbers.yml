@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  area_code: MyString
+  tracking_number: MyString
+  business_number: MyString
+
+two:
+  area_code: MyString
+  tracking_number: MyString
+  business_number: MyString

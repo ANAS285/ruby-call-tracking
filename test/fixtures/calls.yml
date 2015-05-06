@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  CallDuration: MyString
+  From: MyString
+  To: MyString
+
+two:
+  CallDuration: MyString
+  From: MyString
+  To: MyString

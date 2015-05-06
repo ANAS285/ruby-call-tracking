@@ -1,0 +1,36 @@
+<% if  @calls.any? %>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Date Time</th>
+        <th>From</th>
+        <th>Call Tracking Number</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @calls.each do |call| %>
+        <tr>
+          <td><%=l call.created_at %></td>
+          <td><%= call.from %></td>
+          <td><%= call.to %></td>
+          <td><%= call.state %></td>
+          <td><%= call.call_duration %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+
+<% else %>
+
+<div class="well">Sorry, no calls yet.</div>
+
+<% end %>
+
+
+
+
+<%= link_to 'Back', numbers_path,
+            :class => 'btn btn-primary pull-right' %>
