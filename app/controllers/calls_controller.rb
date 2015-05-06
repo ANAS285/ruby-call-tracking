@@ -5,6 +5,10 @@ class CallsController < ApplicationController
   # GET /calls.json
   def index
     @calls = Call.all
+
+    @calls_scope = Call.order("created_at DESC").all
+    @calls = Kaminari.paginate_array(@calls_scope).page(params[:page]).per(10)
+
   end
 
   # GET /calls/1
