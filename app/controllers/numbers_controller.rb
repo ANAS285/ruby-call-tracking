@@ -35,7 +35,10 @@ class NumbersController < ApplicationController
         numbers = Bandwidth::AvailableNumber.search_local({:area_code => @number.area_code[1..3]})
         
         if numbers.count > 0
-          number = Bandwidth::PhoneNumber.create({:number => numbers[0][:number]})
+          # buy the phone number
+          number = Bandwidth::PhoneNumber.create({:number => numbers[0][:number], :applicationId => ENV["BANDWIDTH_APP_ID"]})
+
+          # assign the phone number to your app id
           @number.tracking_number = number.number
           @number.bw_id = number.id
         
