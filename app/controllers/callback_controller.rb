@@ -11,11 +11,13 @@ class CallbackController < ApplicationController
 
       @number = Number.where(:tracking_number => params[:to]).first
 
-      puts "LOG - Number - "+@number.to_s 
-
+      puts "LOG - Number - "+@number.tracking_number 
       puts "LOG - Call Id - "+params[:callId]
+      puts "LOG - tag - "+params[:tag]
 
       @call = Call.where(:call_id => params[:callId]).first_or_create
+
+      puts "LOG - Call - "+@call.to_s
 
       @call.number_id = @number.id
       @call.call_id = params[:callId]
