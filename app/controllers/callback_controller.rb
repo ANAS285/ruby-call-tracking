@@ -28,6 +28,7 @@ class CallbackController < ApplicationController
 
           @call = Call.where(:call_id => params[:callId]).first
           @call.state = "not answered"
+          @call.save   
 
      #
      elsif (params[:eventType] == 'answer') and (!params[:tag].nil?)
@@ -36,7 +37,6 @@ class CallbackController < ApplicationController
           @call.start_time = params[:time]
           @call.state = "answered"
           @call.save   
-          render status: 200
 
      elsif (params[:eventType] == 'hangup') and (!params[:tag].nil?)
 
@@ -47,10 +47,12 @@ class CallbackController < ApplicationController
             @call.duration = (@call.start_time - @call.end_time).to_i
             @call.state = "completed"
           end
+
+          @call.save   
+     
      else 
 
           render nothing: true
-          return
      end
 
   end
