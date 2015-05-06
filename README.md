@@ -2,7 +2,6 @@
 
 Bandwidth Voice & Messaging API Sample App for Call Tracking, see http://ap.bandwidth.com/
 
-![App screenshot](https://github.com/BandwidthExamples/ruby-call-tracking/blob/master/Ruby-CT-App-Screenshot-0.png)
 ![App screenshot](https://github.com/BandwidthExamples/ruby-call-tracking/blob/master/Ruby-CT-App-Screenshot-1.png)
 ![App screenshot](https://github.com/BandwidthExamples/ruby-call-tracking/blob/master/Ruby-CT-App-Screenshot-2.png)
 
