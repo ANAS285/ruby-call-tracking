@@ -33,6 +33,10 @@ class CallbackController < ApplicationController
         @call.duration = (@call.start_time - @call.end_time).to_i
         @call.state = "completed"
 
+   else 
+
+        return
+
    end
 
     if @call.save    
