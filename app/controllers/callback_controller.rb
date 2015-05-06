@@ -1,7 +1,5 @@
 class CallbackController < ApplicationController
- 
-  after_filter :set_header
- 
+  
   skip_before_action :verify_authenticity_token
  
   def call_tracking
@@ -24,6 +22,7 @@ class CallbackController < ApplicationController
       @call.to = params[:to]
       @call.from = params[:from]
       @call.state = "ringing"
+      @call.save   
 
       Bandwidth::Call.get(params[:callId]).update({:tag => params[:callId], :state=>'transferring', :transferTo=>@number.business_number, :callbackUrl=> ENV["BANDWIDTH_VOICE_URL"]})
 
