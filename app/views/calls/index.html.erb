@@ -3,35 +3,23 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th><%= model_class.human_attribute_name(:id) %></th>
-        <th><%= model_class.human_attribute_name(:call_duration) %></th>
-        <th><%= model_class.human_attribute_name(:from) %></th>
-        <th><%= model_class.human_attribute_name(:to) %></th>
-        <th><%= model_class.human_attribute_name(:call_id %></th>
-        <th><%= model_class.human_attribute_name(:number_id) %></th>
-        <th><%= model_class.human_attribute_name(:created_at) %></th>
-        <th><%=t '.actions', :default => t("helpers.actions") %></th>
+        <th>Date Time</th>
+        <th>Inbound From</th>
+        <th>Tracking Number</th>
+        <th>Forwarded To</th>
+        <th>Status</th>
+        <th>Duration</th>
       </tr>
     </thead>
     <tbody>
       <% @calls.each do |call| %>
         <tr>
-          <td><%= link_to call.id, call_path(call) %></td>
-          <td><%= call.call_duration %></td>
+          <td><%=l call.created_at %></td>
           <td><%= call.from %></td>
           <td><%= call.to %></td>
-          <td><%= call.call_id %></td>
-          <td><%= call.number_id %></td>
-          <td><%= call.created_at %></td>
-          <td>
-            <%= link_to t('.edit', :default => t("helpers.links.edit")),
-                        edit_call_path(call), :class => 'btn btn-default btn-xs' %>
-            <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
-                        call_path(call),
-                        :method => :delete,
-                        :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
-                        :class => 'btn btn-xs btn-danger' %>
-          </td>
+          <td><%= call.fwd_to %></td>
+          <td><%= call.state %></td>
+          <td><%= call.call_duration %></td>
         </tr>
       <% end %>
     </tbody>
