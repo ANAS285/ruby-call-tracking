@@ -27,6 +27,7 @@ $ heroku run rake db:migrate
 ```
 
 Login to your Bandwidth App Platform account and setup an [application](http://ap.bandwidth.com/docs/how-to-guides/configuring-apps-incoming-messages-calls/)
+Setup [application] callback with the URL: 'http://xxxxxx-herokuapp.com/callback'
 
 Locate your user id, token and secret for your [Bandwidth App Platform account](http://ap.bandwidth.com/docs/security/)
 
