@@ -27,7 +27,7 @@ class NumbersController < ApplicationController
     @number = Number.new(number_params)
 
     if !@number.business_number.blank?
-      @number.business_number = "+1"+Phony.normalize(@number.business_number)          
+      @number.business_number = "+" + Phony.normalize("+1"+ @number.business_number, cc: '1')          
     end
 
     begin 
@@ -73,7 +73,7 @@ class NumbersController < ApplicationController
   def update
 
     if !params[:number][:business_number].blank?
-      params[:number][:business_number] = "+1"+Phony.normalize(params[:number][:business_number])
+      params[:number][:business_number] = "+" + Phony.normalize("+1" + params[:number][:business_number], cc: '1')
     end
 
     if !params[:number][:tracking_number].blank?
