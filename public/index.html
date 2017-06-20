@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bandwidth Call Tracking</title>
+<!-- <link href="font/css/styles.min.css" rel="stylesheet">
+<link href="css/base.css" rel="stylesheet">
+<link href="css/inputs.css" rel="stylesheet">
+<link href="css/buttons.css" rel="stylesheet">
+<link href="css/tables.css" rel="stylesheet"> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" />
+<link href="https://d3l0ifulerbodr.cloudfront.net/main.css" rel="stylesheet">
+<style>
+    .main-container{
+        width: 85%;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    /*.main-container button{
+        float: right;
+    }*/
+    .table-wrap{
+        margin-top: 5em;
+        clear: both;
+        overflow-y: hidden;
+    }
+    .wss-text{
+        float:left;
+        display:inline;
+        display: flex;
+        flex-direction: row;
+    }
+    .wss-text>* {
+        margin: auto;
+        display: inline;
+        line-height: 1em;
+    }
+    .wss-text code{
+      border-radius: 3px 0px 0px 3px;
+      border-right: 0px;
+    }
+    .wss-button{
+        max-height: 95%;
+        max-width: 95%;
+    }
+    #maskedNumberButton{
+      float: right;
+    }
+    .deleteButton{
+      background-image: url('img/Delete-50.png') !important;
+      background-size: 60% !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      float: none !important;
+      border: none !important;
+    }
+    .table-button{
+        max-height: 99%;
+        max-width: 99%;
+    }
+    .td>* {
+        margin: auto;
+        display: inline;
+        line-height: 1em;
+    }
+    .deleted {
+        text-decoration: line-through;
+    }
+    .selected {
+        background: var(--bw-green);
+    }
+    .toolbar{
+        width: 36px;
+    }
+    .phone-numbers-table{
+        max-height: 250px;
+        overflow-y: auto;
+    }
+    .clickable {
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<div class="main-container">
+    <h1>Bandwidth Call Tracking</h1>
+    <hr />
+    <br />
+    <template v-if="error">
+        <div class="alert clickable" @click="error=null">
+            <p>{{error}}</p>
+        </div>
+    </template>    
+    <form @submit.prevent="addNumber">
+        <div class="inline-wrap">
+            <div class="form-input blocks clearfix required">
+                <label for="input-text">Area code</label>
+                <input type="text" v-model="areCode" required/>
+                <div class="help">Area code for reserved phone number</div>
+            </div>
+            <div class="form-input blocks clearfix required">
+                <label for="input-text">Phone number to forward calls</label>
+                <input type="text" v-model="forwardTo" required />
+                <div class="help">Your phone number which will be used for calls forwarding</div>
+            </div>
+        </div>
+        <button :disabled="!canAddNumber" type="submit" class="button button--medium button--submit button--hover-go button--right" id="maskedNumberButton">Create new phone number</button>
+    </form>
+    <div class="table-wrap phone-numbers-table">
+        <table cellpadding="0" cellspacing="0" class="small">
+            <thead>
+                <tr>
+                    <th>Area code</th>
+                    <th>Phone number</th>
+                    <th>Forward to</th>
+                    <th class="toolbar"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-if="phoneNumbers === null">
+                    <td colspan="4">Loading...</td>
+                </tr>
+                <template v-for="n in phoneNumbers">
+                    <tr :class="{'deleted': n.deleted, 'animated flash': n.isNew, 'selected': n == selectedNumber}" class="clickable" @click="selectNumber(n)">
+                        <td>{{n.areaCode}}</td>
+                        <td>{{n.number | phone-number}}</td>
+                        <td>{{n.forwardTo | phone-number}}</td>
+                        <td class="toolbar"><button @click.stop.prevent="deleteNumber(n)" v-show="!n.deleted" class="btn iconic iconic--secondary iconic--small iconic--light deleteButton"></button></td>
+                    </tr>    
+                </template>
+            </tbody>
+        </table>
+    </div>
+    <template v-if="selectedNumber">
+        <div class="table-wrap">
+            <table cellpadding="0" cellspacing="0" class="small">
+                <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>Started at</th>
+                        <th>Duration</th>
+                        <th>State</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-if="calls === null">
+                        <td colspan="4">Loading...</td>
+                    </tr>
+                    <template v-for="c in calls">
+                        <tr :class="{'animated flash': c.isNew}" :make-visible='c.isNew'>
+                            <td>{{c.fromCName}} ({{c.fromNumber | phone-number}})</td>
+                            <td>{{c.time | time}}</td>
+                            <td><span v-if="c.state === 'completed'">{{c.duration}}</span></td>
+                            <td>{{c.state | state}}</td>
+                        </tr>    
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </template>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/0.4.9/libphonenumber-js.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/robust-websocket@0.2.1/robust-websocket.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.3/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+<script src="js/base.js"></script>
+<script src="js/tables.js"></script>
+<script src="js/vue-helpers.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
