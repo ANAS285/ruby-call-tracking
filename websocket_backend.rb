@@ -1,3 +1,4 @@
+require "date"
 require "faye/websocket"
 require "json"
 
@@ -7,7 +8,47 @@ class WebsocketBackend
     @clients = []
     @commands = {}
 
-    @commands["load-phone-numbers"] = Proc.new do |message, ws, api, applicationId, db|
+    @commands["load-phone-numbers"] = Proc.new do |message, ws, api, application_id, db|
+      db["PhoneNumber"].find({}, {sort: {created: -1, deleted: 1}})
+    end
+
+    @commands["create-phone-number"] = Proc.new do |message, ws, api, application_id, db|
+      number = Bandwidth::PhoneNumber.list(api, {size: 1000, application_id: application_id, name: message["payload"]["forwardTo"]})[0]
+      unless number
+        new_number = Bandwidth:AvailableNumber.search_local(api, {area_code: message["payload"]["areaCode"], quantity: 1})[0][:number]
+        number = Bandwidth::PhoneNumber.create(api, {
+          name: message["payload"]["forwardTo"],
+          application_id: application_id,
+          number: new_number
+        })
+      end
+      raise "Phone number is already used" if db["PhoneNumber"].find({number: new_number, deleted: {"$ne": true}}, {limit: 1})[0]
+      num = {
+        areaCode: message["payload"]["areaCode"],
+        forwardTo: message["payload"]["forwardTo"],
+        number: new_number,
+        numberId: number.id,
+        created: DateTime.now()
+      }
+      result = db["PhoneNumber"].insert_one(num)
+      num.id = result._id
+      num
+    end
+
+    @commands["delete-phone-number"] = Proc.new do |message, ws, api, application_id, db|
+      number = db["PhoneNumber"].find({_id: message["payload"]["id"]}, {limit: 1})[0]
+      raise "Phone number is not exists" unless number
+      n = Bandwidth::PhoneNumber.get(api, message["payload"]["id"])
+      n.delete if n
+      db["PhoneNumber"].update_one({_id: message["payload"]["id"]}, {"$set": {deleted: true}})
+      message["payload"]["id"]
+    end
+
+    @commands["load-calls"] = Proc.new do |message, ws, api, application_id, db|
+      db["Call"].find({phoneNumber: message["payload"]["id"]}, {sort: {time: -1}}).map do |c|
+        c.id = c._id
+        c
+      end
     end
   end
 
