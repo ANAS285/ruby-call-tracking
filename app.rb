@@ -70,7 +70,25 @@ class CallTrackingApp < Sinatra::Base
           }))
         end
       when "hangup"
-
+        call = db["Call"].find(
+          {$or: [{callId}, {transferCallId: callId}], state: {$ne: 'completed'}},
+          {limit: 1}
+        )[0]
+        if call
+          seconds = Time.iso8601(params["time"]) - Time.iso8601(call["time"])
+          hours = 0
+          minutes = 0
+          if seconds >= 60
+            minutes = seconds/60
+            seconds = seconds%60
+          end
+          if minutes >= 60
+            hours = minutes/60
+            minutes = minutes%60
+          end
+          duration = format("%02d:%02d:%02d", hours, minutes, seconds)
+          db["Call"].update({_id: call["_id"]}, {"$set": {state: "completed", duration: duration}})
+        end
     end
   end
 
