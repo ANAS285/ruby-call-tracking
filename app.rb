@@ -1,12 +1,17 @@
 require "bundler"
 Bundler.require
 
+require "rack/moneta_store"
+
 require "./websocket_backend"
 require "./bandwidth_backend"
+require "./database_backend"
 require "./helpers"
 
 class CallTrackingApp < Sinatra::Base
   use Rack::PostBodyContentTypeParser
+  use Rack::MonetaStore, :Memory, cache: true
+  use DatabaseBackend
   use BandwidthBackend
   use WebsocketBackend
 

@@ -27,6 +27,8 @@ GEM
     mustermann (1.0.0)
     puma (3.9.1)
     rack (2.0.3)
+    rack-contrib (1.2.0)
+      rack (>= 0.9.1)
     rack-protection (2.0.0)
       rack
     ruby-bandwidth (1.0.15)
@@ -59,6 +61,7 @@ DEPENDENCIES
   mongo
   puma
   rack
+  rack-contrib
   ruby-bandwidth
   sinatra
 
