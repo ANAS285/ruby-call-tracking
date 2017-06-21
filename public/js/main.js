@@ -90,9 +90,15 @@
 	}
 
 	function addNumber() {
-		const forwardTo = libphonenumber.format(libphonenumber.parse(state.forwardTo, 'US').phone, 'US', 'International_plaintext');
+		let forwardTo = state.forwardTo;
+    if (forwardTo.startsWith('+')){
+      forwardTo = forwardTo.substr(1);
+    }
+    if (forwardTo.length === 9) {
+      forwardTo = `1${forwardTo}`;
+    }
 		state.canAddNumber = false;
-		sendCommand('create-phone-number', {areaCode: state.areCode, forwardTo});
+		sendCommand('create-phone-number', {areaCode: state.areCode, forwardTo: `+${forwardTo}`});
 	}
 
 	function deleteNumber(number) {

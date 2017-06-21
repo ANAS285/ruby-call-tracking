@@ -13,7 +13,7 @@ class CallTrackingApp < Sinatra::Base
   use Rack::MonetaStore, :Memory, cache: true
   use DatabaseBackend
   use BandwidthBackend
-  #use WebsocketBackend
+  use WebsocketBackend
 
   set :public_dir, File.join(File.dirname(__FILE__), "public")
 

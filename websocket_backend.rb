@@ -1,6 +1,7 @@
 require "date"
 require "faye/websocket"
 require "json"
+require "byebug"
 
 class WebsocketBackend
   def initialize(app)
@@ -9,34 +10,39 @@ class WebsocketBackend
     @commands = {}
 
     @commands["load-phone-numbers"] = Proc.new do |message, ws, api, application_id, db|
-      db["PhoneNumber"].find({}, {sort: {created: -1, deleted: 1}})
+      db["PhoneNumber"].find({}, {sort: {created: -1, deleted: 1}}).to_a().map {|p|
+        p[:id] = p[:_id].to_s
+        p
+      }
     end
 
     @commands["create-phone-number"] = Proc.new do |message, ws, api, application_id, db|
-      number = Bandwidth::PhoneNumber.list(api, {size: 1000, application_id: application_id, name: message["payload"]["forwardTo"]})[0]
+      number = Bandwidth::PhoneNumber.list(api, {application_id: application_id, name: message["payload"]["forwardTo"]})[0]
       unless number
-        new_number = Bandwidth:AvailableNumber.search_local(api, {area_code: message["payload"]["areaCode"], quantity: 1})[0][:number]
+        new_number = Bandwidth::AvailableNumber.search_local(api, {area_code: message["payload"]["areaCode"], quantity: 1})[0][:number]
         number = Bandwidth::PhoneNumber.create(api, {
           name: message["payload"]["forwardTo"],
           application_id: application_id,
           number: new_number
         })
       end
-      raise "Phone number is already used" if db["PhoneNumber"].find({number: new_number, deleted: {"$ne": true}}, {limit: 1})[0]
+      raise "Phone number is already used" if db["PhoneNumber"].find({number: new_number, deleted: {"$ne": true}}, {limit: 1}).first
       num = {
+        _id: BSON::ObjectId.new(),
         areaCode: message["payload"]["areaCode"],
         forwardTo: message["payload"]["forwardTo"],
-        number: new_number,
-        numberId: number.id,
-        created: DateTime.now()
+        number: number[:number],
+        numberId: number[:id],
+        created: Time.now.utc.iso8601
       }
-      result = db["PhoneNumber"].insert_one(num)
-      num.id = result._id
+      byebug
+      db["PhoneNumber"].insert_one(num)
+      num[:id] = num[:_id].to_s
       num
     end
 
     @commands["delete-phone-number"] = Proc.new do |message, ws, api, application_id, db|
-      number = db["PhoneNumber"].find({_id: message["payload"]["id"]}, {limit: 1})[0]
+      number = db["PhoneNumber"].find({_id: message["payload"]["id"]}, {limit: 1}).first
       raise "Phone number is not exists" unless number
       n = Bandwidth::PhoneNumber.get(api, message["payload"]["id"])
       n.delete if n
@@ -46,7 +52,7 @@ class WebsocketBackend
 
     @commands["load-calls"] = Proc.new do |message, ws, api, application_id, db|
       db["Call"].find({phoneNumber: message["payload"]["id"]}, {sort: {time: -1}}).map do |c|
-        c.id = c._id
+        c[:id] = c[:_id].to_s
         c
       end
     end
