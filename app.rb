@@ -5,7 +5,6 @@ require "./websocket_backend"
 require "./bandwidth_backend"
 require "./helpers"
 
-
 class CallTrackingApp < Sinatra::Base
   use Rack::PostBodyContentTypeParser
   use BandwidthBackend
@@ -52,7 +51,7 @@ class CallTrackingApp < Sinatra::Base
             callback_url: callback_url
           })
           cache[call_id] = {
-            id: number._id,
+            id: number["_id"],
             call_id: call_id,
             transfered_call_id: transfered_call_id,
             mutex_name: mutex_name
@@ -64,14 +63,14 @@ class CallTrackingApp < Sinatra::Base
             fromNumber: params["from"],
             callId: call_id,
             transferedCallId: transfered_call_id,
-            phoneNumber: number._id,
+            phoneNumber: number["_id"],
             fromCName: info[:name],
             state: "ringing"
-          }))
+          })
         end
       when "hangup"
         call = db["Call"].find(
-          {$or: [{callId}, {transferCallId: callId}], state: {$ne: 'completed'}},
+          {"$or" => [{callId: call_id}, {transferCallId: call_id}], state: {"$ne" => 'completed'}},
           {limit: 1}
         )[0]
         if call
@@ -86,10 +85,9 @@ class CallTrackingApp < Sinatra::Base
             hours = minutes/60
             minutes = minutes%60
           end
-          duration = format("%02d:%02d:%02d", hours, minutes, seconds)
+          duration = "%02d:%02d:%02d" % [hours, minutes, seconds]
           db["Call"].update({_id: call["_id"]}, {"$set": {state: "completed", duration: duration}})
         end
     end
   end
-
 end

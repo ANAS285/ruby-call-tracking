@@ -99,5 +99,4 @@ class WebsocketBackend
       @app.call(env)
     end
   end
-
 end

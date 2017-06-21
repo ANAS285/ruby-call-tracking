@@ -12,7 +12,7 @@ class BandwidthBackend
     host = env["SERVER_NAME"]
     env["applicationId"] = get_from_cache env, "#{APPLICATION_NAME}::#{host}", lambda do
       application_name = "#{APPLICATION_NAME} on #{host}"
-      app = Bandwidth::Application.list(api, {size: 1000}).detect({|a| a.name == application_name})
+      app = Bandwidth::Application.list(api, {size: 1000}).detect {|a| a.name == application_name}
       unless app
         base_url = "https://#{host}"
         app = Bandwidth::Application.create(api, {
