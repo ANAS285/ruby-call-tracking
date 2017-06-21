@@ -1,5 +1,6 @@
 require "./helpers"
 APPLICATION_NAME = "call-tracking"
+require "byebug"
 
 class BandwidthBackend
   def initialize(app)
@@ -10,7 +11,7 @@ class BandwidthBackend
     api = Bandwidth::Client.new(ENV["BANDWIDTH_USER_ID"], ENV["BANDWIDTH_API_TOKEN"], ENV["BANDWIDTH_API_SECRET"])
     env["bandwidthApi"] = api
     host = env["SERVER_NAME"]
-    env["applicationId"] = get_from_cache env, "#{APPLICATION_NAME}::#{host}", lambda do
+    env["applicationId"] = get_from_cache env, "#{APPLICATION_NAME}::#{host}", lambda {
       application_name = "#{APPLICATION_NAME} on #{host}"
       app = Bandwidth::Application.list(api, {size: 1000}).detect {|a| a.name == application_name}
       unless app
@@ -23,7 +24,7 @@ class BandwidthBackend
         })
       end
       app.id
-    end
+    }
     @app.call(env)
   end
 end

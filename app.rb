@@ -13,7 +13,7 @@ class CallTrackingApp < Sinatra::Base
   use Rack::MonetaStore, :Memory, cache: true
   use DatabaseBackend
   use BandwidthBackend
-  use WebsocketBackend
+  #use WebsocketBackend
 
   set :public_dir, File.join(File.dirname(__FILE__), "public")
 
@@ -36,7 +36,7 @@ class CallTrackingApp < Sinatra::Base
           Moneta::Mutex.new(cache, transfered_call_data[:mutex_name]).synchronize do
             # wait for call data to be stored in db
             puts "Call state (#{transfered_call_data[:call_id]}->#{transfered_call_data[:transfered_call_id]}): active"
-            db["Call"].update({_id: transfered_call_data[:id]}, {"$set": {state: "active"}})
+            db["Call"].update({_id: transfered_call_data[:id]}, {"$set" => {state: "active"}})
           end
         end
         number = db["PhoneNumber"].find({number: params["to"]}, {limit: 1})[0]
@@ -91,7 +91,7 @@ class CallTrackingApp < Sinatra::Base
             minutes = minutes%60
           end
           duration = "%02d:%02d:%02d" % [hours, minutes, seconds]
-          db["Call"].update({_id: call["_id"]}, {"$set": {state: "completed", duration: duration}})
+          db["Call"].update({_id: call["_id"]}, {"$set" => {state: "completed", duration: duration}})
         end
     end
   end
