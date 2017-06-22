@@ -33,20 +33,21 @@ class WebsocketBackend
         forwardTo: message["payload"]["forwardTo"],
         number: number[:number],
         numberId: number[:id],
-        created: Time.now.utc.iso8601
+        created: Time.now.utc.iso8601,
+        deleted: false
       }
-      byebug
       db["PhoneNumber"].insert_one(num)
       num[:id] = num[:_id].to_s
       num
     end
 
     @commands["delete-phone-number"] = Proc.new do |message, ws, api, application_id, db|
-      number = db["PhoneNumber"].find({_id: message["payload"]["id"]}, {limit: 1}).first
+      id = BSON::ObjectId.from_string(message["payload"]["id"])
+      number = db["PhoneNumber"].find({_id: id}, {limit: 1}).first
       raise "Phone number is not exists" unless number
-      n = Bandwidth::PhoneNumber.get(api, message["payload"]["id"])
+      n = Bandwidth::PhoneNumber.get(api, number[:numberId])
       n.delete if n
-      db["PhoneNumber"].update_one({_id: message["payload"]["id"]}, {"$set": {deleted: true}})
+      db["PhoneNumber"].update_one({_id: id}, {"$set": {deleted: true}})
       message["payload"]["id"]
     end
 
