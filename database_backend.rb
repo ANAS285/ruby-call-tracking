@@ -1,5 +1,7 @@
 require "./helpers"
 
+Mongo::Logger.logger.level = ::Logger::FATAL
+
 class DatabaseBackend
   def initialize(app)
     @app = app

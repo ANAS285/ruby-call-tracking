@@ -8,6 +8,8 @@ require "./bandwidth_backend"
 require "./database_backend"
 require "./helpers"
 
+require "byebug"
+
 class CallTrackingApp < Sinatra::Base
   use Rack::PostBodyContentTypeParser
   use Rack::MonetaStore, :Memory, cache: true
@@ -28,7 +30,13 @@ class CallTrackingApp < Sinatra::Base
     api = env["bandwidthApi"]
     application_id = env["applicationId"]
     call_id = params["callId"]
-    p ["Application ID", application_id]
+    websockets = env["websockets"]
+    send_to_all = lambda {|call|
+      data = call.to_hash()
+      data[:id] = data[:_id].to_s()
+      data[:phoneNumberId] = data[:phoneNumber]
+      websockets.each {|w| w.send_message({notificationType: "call", data: data})}
+    }
     case(params["eventType"])
       when "answer"
         transfered_call_data = cache[call_id]
@@ -37,7 +45,8 @@ class CallTrackingApp < Sinatra::Base
           Moneta::Mutex.new(cache, transfered_call_data[:mutex_name]).synchronize do
             # wait for call data to be stored in db
             puts "Call state (#{transfered_call_data[:call_id]}->#{transfered_call_data[:transfered_call_id]}): active"
-            db["Call"].update({callId: transfered_call_data[:call_id]}, {"$set" => {state: "active"}})
+            db["Call"].update_one({callId: transfered_call_data[:call_id]}, {"$set" => {state: "active"}})
+            send_to_all.call(db["Call"].find({callId: transfered_call_data[:call_id]}, {limit: 1}).first)
           end
         end
         number = db["PhoneNumber"].find({number: params["to"]}, {limit: 1}).first
@@ -53,7 +62,7 @@ class CallTrackingApp < Sinatra::Base
           transfered_call_id = call.update({
             state: "transferring",
             transfer_caller_id: params["from"],
-            transfer_to: number["forwardTo"],
+            transfer_to: number[:forwardTo],
             callback_url: callback_url
           })
           cache[transfered_call_id] = {
@@ -63,15 +72,18 @@ class CallTrackingApp < Sinatra::Base
           }
           puts "Call state (#{call_id}->#{transfered_call_id}): ringing"
           info = Bandwidth::NumberInfo.get(api, params["from"])
-          db["Call"].insert({
+          call_data = {
+            _id: BSON::ObjectId.new(),
             time: params["time"],
             fromNumber: params["from"],
             callId: call_id,
             transferedCallId: transfered_call_id,
-            phoneNumber: number["_id"].to_s,
+            phoneNumber: number[:_id].to_s(),
             fromCName: info[:name],
             state: "ringing"
-          })
+          }
+          db["Call"].insert_one(call_data)
+          send_to_all.call(call_data)
         end
       when "hangup"
         call = db["Call"].find(
@@ -91,7 +103,11 @@ class CallTrackingApp < Sinatra::Base
             minutes = minutes%60
           end
           duration = "%02d:%02d:%02d" % [hours, minutes, seconds]
-          db["Call"].update({_id: call["_id"]}, {"$set" => {state: "completed", duration: duration}})
+          puts "Call state (#{call[:callId]}->#{call[:transferedCallId]}): completed (#{duration})"
+          db["Call"].update_one({_id: call[:_id]}, {"$set" => {state: "completed", duration: duration}})
+          call[:state] = "completed"
+          call[:duration] = duration
+          send_to_all.call(call)
         end
     end
   end
