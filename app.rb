@@ -26,8 +26,9 @@ class CallTrackingApp < Sinatra::Base
     cache = env["rack.moneta_store"]
     db = env["database"]
     api = env["bandwidthApi"]
-    application_id = params["applicationId"]
+    application_id = env["applicationId"]
     call_id = params["callId"]
+    p ["Application ID", application_id]
     case(params["eventType"])
       when "answer"
         transfered_call_data = cache[call_id]
@@ -36,15 +37,15 @@ class CallTrackingApp < Sinatra::Base
           Moneta::Mutex.new(cache, transfered_call_data[:mutex_name]).synchronize do
             # wait for call data to be stored in db
             puts "Call state (#{transfered_call_data[:call_id]}->#{transfered_call_data[:transfered_call_id]}): active"
-            db["Call"].update({_id: transfered_call_data[:id]}, {"$set" => {state: "active"}})
+            db["Call"].update({callId: transfered_call_data[:call_id]}, {"$set" => {state: "active"}})
           end
         end
-        number = db["PhoneNumber"].find({number: params["to"]}, {limit: 1})[0]
+        number = db["PhoneNumber"].find({number: params["to"]}, {limit: 1}).first
         return unless number
-        callback_url = get_from_cache env, "callback-#{application_id}", lambda do
+        callback_url = get_from_cache env, "callback-#{application_id}", lambda {
           app = Bandwidth::Application.get(api, application_id)
           app[:incoming_call_url]
-        end
+        }
         mutex_name = "transfered_call_data_#{call_id}"
         mutex = Moneta::Mutex.new(cache, mutex_name)
         mutex.synchronize do
@@ -55,8 +56,7 @@ class CallTrackingApp < Sinatra::Base
             transfer_to: number["forwardTo"],
             callback_url: callback_url
           })
-          cache[call_id] = {
-            id: number["_id"],
+          cache[transfered_call_id] = {
             call_id: call_id,
             transfered_call_id: transfered_call_id,
             mutex_name: mutex_name
@@ -68,7 +68,7 @@ class CallTrackingApp < Sinatra::Base
             fromNumber: params["from"],
             callId: call_id,
             transferedCallId: transfered_call_id,
-            phoneNumber: number["_id"],
+            phoneNumber: number["_id"].to_s,
             fromCName: info[:name],
             state: "ringing"
           })
@@ -77,7 +77,7 @@ class CallTrackingApp < Sinatra::Base
         call = db["Call"].find(
           {"$or" => [{callId: call_id}, {transferCallId: call_id}], state: {"$ne" => 'completed'}},
           {limit: 1}
-        )[0]
+        ).first
         if call
           seconds = Time.iso8601(params["time"]) - Time.iso8601(call["time"])
           hours = 0

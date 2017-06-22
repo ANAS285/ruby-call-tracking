@@ -90,7 +90,7 @@
 	}
 
 	function addNumber() {
-		let forwardTo = state.forwardTo;
+		let forwardTo = state.forwardTo.replace(/[\(\)\s\-]/g, '');
     if (forwardTo.startsWith('+')){
       forwardTo = forwardTo.substr(1);
     }
