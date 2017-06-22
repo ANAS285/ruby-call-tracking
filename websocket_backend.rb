@@ -1,7 +1,6 @@
 require "date"
 require "faye/websocket"
 require "json"
-require "byebug"
 
 class WebsocketBackend
   def initialize(app)

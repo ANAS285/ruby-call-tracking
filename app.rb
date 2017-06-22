@@ -8,11 +8,9 @@ require "./bandwidth_backend"
 require "./database_backend"
 require "./helpers"
 
-require "byebug"
-
 class CallTrackingApp < Sinatra::Base
   use Rack::PostBodyContentTypeParser
-  use Rack::MonetaStore, :Memory, cache: true
+  use Rack::MonetaStore, :File, :dir => File.join(File.dirname(__FILE__), ".cache")
   use DatabaseBackend
   use BandwidthBackend
   use WebsocketBackend
