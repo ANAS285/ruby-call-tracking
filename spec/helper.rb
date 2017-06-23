@@ -16,6 +16,13 @@ def create_app()
   MockApp.new()
 end
 
+def create_db()
+  {
+    "Call" => double("CallCollection"),
+    "PhoneNumber" => double("PhoneNumberCollection")
+  }
+end
+
 class MockApp
   def call(env)
   end

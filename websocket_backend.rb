@@ -64,6 +64,7 @@ class WebsocketBackend
       ws = Faye::WebSocket.new(env)
       class << ws
         def send_message(message)
+          # p JSON.generate(message)
           self.send JSON.generate(message)
         end
       end
@@ -73,7 +74,6 @@ class WebsocketBackend
       end
 
       ws.on :message do |event|
-        puts "Received new message #{event.data}"
         message = {}
         begin
           message = JSON.parse(event.data)
@@ -81,14 +81,14 @@ class WebsocketBackend
           puts "Invalid format of received data #{event.data}"
         end
         handler = @commands[message["command"]]
-        return puts "Command #{message["command"]} is not implemented" unless handler
-        puts "Executing command #{message["command"]} with data #{message["payload"]}"
-        begin
-          result = handler.call(message, ws, env["bandwidthApi"], env["applicationId"], env["database"])
-          ws.send_message({command: message["command"], result: result});
-        rescue Exception => err
-          ws.send_message({command: message["command"], error: err});
-          puts err.backtrace
+        if handler
+          begin
+            result = handler.call(message, ws, env["bandwidthApi"], env["applicationId"], env["database"])
+            ws.send_message({command: message["command"], result: result});
+          rescue Exception => err
+            ws.send_message({command: message["command"], error: err});
+            puts err.backtrace
+          end
         end
       end
 
