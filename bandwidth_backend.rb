@@ -1,4 +1,4 @@
-require "./helpers"
+require "./helper"
 APPLICATION_NAME = "call-tracking"
 class BandwidthBackend
   def initialize(app)

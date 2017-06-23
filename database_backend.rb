@@ -1,4 +1,4 @@
-require "./helpers"
+require "./helper"
 
 Mongo::Logger.logger.level = ::Logger::FATAL
 

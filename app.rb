@@ -6,7 +6,7 @@ require "rack/moneta_store"
 require "./websocket_backend"
 require "./bandwidth_backend"
 require "./database_backend"
-require "./helpers"
+require "./helper"
 
 class CallTrackingApp < Sinatra::Base
   use Rack::PostBodyContentTypeParser
