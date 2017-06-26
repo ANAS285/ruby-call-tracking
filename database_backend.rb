@@ -8,6 +8,7 @@ class DatabaseBackend
   end
 
   def call(env)
+    return @app.call(env) if env["database"]
     url = ENV["DATABASE_URL"] || ENV["MONGODB_URI"] || "mongodb://localhost/call-tracking"
     db = Mongo::Client.new(url)
     get_from_cache env, "db:#{url}", lambda {

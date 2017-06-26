@@ -22,7 +22,7 @@ class CallTrackingApp < Sinatra::Base
   end
 
   post "/bandwidth/callback/call" do
-    p ["/bandwidth/callback/call", params]
+    # p ["/bandwidth/callback/call", params]
     cache = env["rack.moneta_store"]
     db = env["database"]
     api = env["bandwidthApi"]
@@ -42,7 +42,7 @@ class CallTrackingApp < Sinatra::Base
           cache.delete(call_id)
           Moneta::Mutex.new(cache, transfered_call_data[:mutex_name]).synchronize do
             # wait for call data to be stored in db
-            puts "Call state (#{transfered_call_data[:call_id]}->#{transfered_call_data[:transfered_call_id]}): active"
+            # puts "Call state (#{transfered_call_data[:call_id]}->#{transfered_call_data[:transfered_call_id]}): active"
             db["Call"].update_one({callId: transfered_call_data[:call_id]}, {"$set" => {state: "active"}})
             send_to_all.call(db["Call"].find({callId: transfered_call_data[:call_id]}, {limit: 1}).first)
           end
@@ -68,7 +68,7 @@ class CallTrackingApp < Sinatra::Base
             transfered_call_id: transfered_call_id,
             mutex_name: mutex_name
           }
-          puts "Call state (#{call_id}->#{transfered_call_id}): ringing"
+          # puts "Call state (#{call_id}->#{transfered_call_id}): ringing"
           info = Bandwidth::NumberInfo.get(api, params["from"])
           call_data = {
             _id: BSON::ObjectId.new(),
@@ -85,11 +85,11 @@ class CallTrackingApp < Sinatra::Base
         end
       when "hangup"
         call = db["Call"].find(
-          {"$or" => [{callId: call_id}, {transferCallId: call_id}], state: {"$ne" => 'completed'}},
+          {"$or" => [{callId: call_id}, {transferCallId: call_id}], state: {"$ne" => "completed"}},
           {limit: 1}
         ).first
         if call
-          seconds = Time.iso8601(params["time"]) - Time.iso8601(call["time"])
+          seconds = Time.iso8601(params["time"]) - Time.iso8601(call[:time])
           hours = 0
           minutes = 0
           if seconds >= 60
@@ -101,7 +101,7 @@ class CallTrackingApp < Sinatra::Base
             minutes = minutes%60
           end
           duration = "%02d:%02d:%02d" % [hours, minutes, seconds]
-          puts "Call state (#{call[:callId]}->#{call[:transferedCallId]}): completed (#{duration})"
+          # puts "Call state (#{call[:callId]}->#{call[:transferedCallId]}): completed (#{duration})"
           db["Call"].update_one({_id: call[:_id]}, {"$set" => {state: "completed", duration: duration}})
           call[:state] = "completed"
           call[:duration] = duration
