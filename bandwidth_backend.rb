@@ -1,5 +1,5 @@
 require "./helper"
-APPLICATION_NAME = "call-tracking"
+APPLICATION_NAME = "CallTracking"
 class BandwidthBackend
   def initialize(app)
     @app = app
