@@ -14,6 +14,7 @@ gem "mongo"
 gem "byebug", :group => :development
 
 group :test do
+  gem 'rake'
   gem 'rspec'
   gem 'rspec-mocks'
 end
