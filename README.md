@@ -29,14 +29,15 @@ Bandwidth Voice API Sample App for Call Tracking, see http://ap.bandwidth.com/
 ### Directly
 
 ```bash
-# Check first if mongodb is started and available
+# Check first if mongodb instance is available
 # Use DATABASE_URL to specify location of db collection if need
 
 export BANDWIDTH_USER_ID=<YOUR-USER-ID>
 export BANDWIDTH_API_TOKEN=<YOUR-API-TOKEN>
 export BANDWIDTH_API_SECRET=<YOUR-API-SECRET>
-npm install # to install dependencies
-npm start
+bundle install # to install dependencies
+
+bundle exec puma -p 8080
 ```
 
 ### Via Docker
