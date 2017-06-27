@@ -10,7 +10,7 @@ require "./helper"
 
 class CallTrackingApp < Sinatra::Base
   use Rack::PostBodyContentTypeParser
-  use Rack::MonetaStore, :File, :dir => File.join(File.dirname(__FILE__), ".cache")
+  use Rack::MonetaStore, :File, :dir => File.join(Dir.tmpdir(), ".cache")
   use DatabaseBackend
   use BandwidthBackend
   use WebsocketBackend
