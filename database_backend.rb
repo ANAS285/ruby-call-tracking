@@ -25,7 +25,7 @@ class DatabaseBackend
         { key: { state: 1 }},
         { key: { phoneNumber: 1 }}
       ])
-      db
+      url
     }
     env["database"] = db
     @app.call(env)
