@@ -1,4 +1,10 @@
+<div align="center">
+
 # Bandwidth Call Tracking Ruby Example
+
+<a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW_all.png"/></a>
+</div>
+
 [![Build Status](https://travis-ci.org/BandwidthExamples/ruby-call-tracking.svg)](https://travis-ci.org/BandwidthExamples/ruby-call-tracking)
 
 A Call Tracking app for [Bandwidth Voice and Messaging APIs](http://dev.bandwidth.com/).
