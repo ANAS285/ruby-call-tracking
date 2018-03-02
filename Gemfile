@@ -10,6 +10,7 @@ gem "puma"
 gem "i18n"
 gem "moneta"
 gem "mongo"
+gem "activesupport", "~> 4.1.11"
 
 gem "byebug", :group => :development
 
